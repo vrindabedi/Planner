@@ -1,0 +1,137 @@
+<svg xmlns="http://w3.org" viewBox="0 0 1200 800" width="100%" height="100%">
+  <defs>
+    <!-- Sky Background Gradient -->
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#050515" />
+      <stop offset="40%" stop-color="#0b1026" />
+      <stop offset="75%" stop-color="#1c1a3a" />
+      <stop offset="100%" stop-color="#3c2f4d" />
+    </linearGradient>
+
+    <!-- Aurora / Cosmic Glow Gradients -->
+    <radialGradient id="nebulaGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#4a2574" stop-opacity="0.35" />
+      <stop offset="50%" stop-color="#1f3c6d" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    
+    <linearGradient id="auroraGreen" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00ffcc" stop-opacity="0" />
+      <stop offset="50%" stop-color="#00ff88" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#33ccff" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Moon Gradients -->
+    <linearGradient id="moonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="40%" stop-color="#fdf4e7" />
+      <stop offset="100%" stop-color="#d4c5b3" />
+    </linearGradient>
+    
+    <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4" />
+      <stop offset="30%" stop-color="#fdf4e7" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Mountain Gradients -->
+    <linearGradient id="mountainBackD" x1="30%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#26284c" />
+      <stop offset="100%" stop-color="#161329" />
+    </linearGradient>
+
+    <linearGradient id="mountainMidD" x1="40%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#161933" />
+      <stop offset="100%" stop-color="#090a14" />
+    </linearGradient>
+
+    <linearGradient id="mountainForeD" x1="50%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#08091a" />
+      <stop offset="100%" stop-color="#020205" />
+    </linearGradient>
+
+    <linearGradient id="lakeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#151124" />
+      <stop offset="40%" stop-color="#0d0a1a" />
+      <stop offset="100%" stop-color="#05030a" />
+    </linearGradient>
+    
+    <filter id="mistFilter" x="0%" y="0%" width="100%" height="100%">
+      <feGaussianBlur stdDeviation="8" />
+    </filter>
+  </defs>
+
+  <!-- BACKGROUND SKY -->
+  <rect width="1200" height="800" fill="url(#skyGradient)" />
+  <rect width="1200" height="800" fill="url(#nebulaGlow)" />
+  
+  <!-- Cosmic Aurora Waves -->
+  <path d="M-100,250 Q200,100 600,220 T1300,150 L1300,450 L-100,450 Z" fill="url(#auroraGreen)" filter="url(#mistFilter)" />
+  <path d="M-50,300 Q350,150 750,280 T1350,180 L1350,500 L-50,500 Z" fill="url(#auroraGreen)" opacity="0.6" filter="url(#mistFilter)" />
+
+  <!-- STARS -->
+  <g id="stars">
+    <circle cx="45" cy="120" r="0.5" fill="#ffffff" opacity="0.6" />
+    <circle cx="120" cy="45" r="0.7" fill="#ffffff" opacity="0.4" />
+    <circle cx="230" cy="190" r="0.6" fill="#ffffff" opacity="0.8" />
+    <circle cx="310" cy="80" r="0.5" fill="#ffffff" opacity="0.5" />
+    <circle cx="460" cy="230" r="0.8" fill="#e0f0ff" opacity="0.7" />
+    <circle cx="550" cy="70" r="0.4" fill="#ffffff" opacity="0.4" />
+    <circle cx="680" cy="150" r="0.6" fill="#ffffff" opacity="0.9" />
+    <circle cx="790" cy="85" r="0.5" fill="#fff0e0" opacity="0.6" />
+    <circle cx="890" cy="210" r="0.7" fill="#ffffff" opacity="0.5" />
+    <circle cx="950" cy="50" r="0.5" fill="#ffffff" opacity="0.8" />
+    <circle cx="90" cy="220" r="1.2" fill="#ffffff" opacity="0.85" />
+    <circle cx="280" cy="130" r="1.0" fill="#e0f0ff" opacity="0.75" />
+    <circle cx="400" cy="60" r="1.3" fill="#ffffff" opacity="0.9" />
+    <circle cx="840" cy="160" r="1.4" fill="#ffffff" opacity="0.95" />
+  </g>
+
+  <!-- THE MOON -->
+  <g transform="translate(950, 160)">
+    <circle cx="0" cy="0" r="60" fill="url(#moonGlow)" />
+    <circle cx="0" cy="0" r="35" fill="url(#moonGradient)" />
+    <path d="M -24.7,-24.7 A 35,35 0 1,0 24.7,24.7 A 32,32 0 1,1 -24.7,-24.7 Z" fill="#0b1026" opacity="0.85" />
+  </g>
+
+  <!-- BACKGROUND MOUNTAINS -->
+  <g id="back-mountains" opacity="0.75">
+    <polygon points="-100,550 150,280 380,550" fill="url(#mountainBackD)" />
+    <polygon points="700,550 1000,220 1300,550" fill="url(#mountainBackD)" />
+    <polygon points="250,550 600,250 900,550" fill="url(#mountainBackD)" />
+  </g>
+
+  <!-- MID-GROUND MOUNTAINS -->
+  <g id="mid-mountains">
+    <path d="M-50,550 L250,340 L500,550 Z" fill="url(#mountainMidD)" />
+    <path d="M450,550 L800,310 L1150,550 Z" fill="url(#mountainMidD)" />
+  </g>
+
+  <!-- FOREGROUND RIDGE -->
+  <g id="fore-mountains">
+    <path d="M-50,550 L120,440 L240,490 L380,420 L550,550 Z" fill="url(#mountainForeD)" />
+    <path d="M650,550 L850,430 L1020,475 L1120,400 L1250,550 Z" fill="url(#mountainForeD)" />
+  </g>
+
+  <!-- FOREGROUND SILHOUETTES -->
+  <g id="pines" fill="#05050f">
+    <polygon points="50,495 47,505 53,505" />
+    <polygon points="80,475 76,488 84,488" />
+    <polygon points="110,455 106,468 114,468" />
+    <polygon points="370,430 365,445 375,445" />
+    <polygon points="850,440 845,455 855,455" />
+    <polygon points="1120,410 1116,425 1124,425" />
+  </g>
+
+  <!-- REFLECTIVE LAKE LOWER HALF -->
+  <rect x="0" y="550" width="1200" height="250" fill="url(#lakeGradient)" />
+
+  <!-- Lake Mountain Reflections -->
+  <g id="reflections" opacity="0.2" transform="scale(1, -1) translate(0, -1100)">
+    <path d="M250,340 L500,550 L0,550 Z" fill="#242954" filter="url(#mistFilter)" />
+    <path d="M450,550 L800,310 L1150,550 Z" fill="#242954" filter="url(#mistFilter)" />
+  </g>
+  
+  <ellipse cx="950" cy="620" rx="45" ry="3" fill="#ffffff" opacity="0.2" filter="url(#mistFilter)" />
+  <line x1="0" y1="550" x2="1200" y2="550" stroke="#0d0e21" stroke-width="2" />
+</svg>

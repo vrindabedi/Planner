@@ -1,0 +1,142 @@
+/* ============================================================
+   STUDENT DESIGN STUDIO — CUSTOM STYLES & ANIMATIONS
+   ============================================================ */
+
+/* Notion & Google Keep Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8D6CE;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #BBB8AF;
+}
+
+/* Smooth drag and drop styling */
+.drag-over {
+  border-color: #3B82F6 !important;
+  background-color: #EFF6FF !important;
+  transform: scale(1.01);
+  transition: all 0.2s ease;
+}
+
+.task-card-dragging {
+  opacity: 0.45;
+  transform: rotate(2deg);
+}
+
+/* Pulse animation for active alarms */
+@keyframes alarmRingingPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 16px rgba(239, 68, 68, 0);
+  }
+}
+
+.animate-alarm-ringing {
+  animation: alarmRingingPulse 1s infinite ease-in-out;
+}
+
+/* Floating Miniplayer */
+.miniplayer-floating {
+  position: fixed !important;
+  bottom: 1.5rem !important;
+  right: 1.5rem !important;
+  width: 360px !important;
+  z-index: 45 !important;
+  box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.35) !important;
+  border-radius: 1.25rem !important;
+}
+
+/* Google Keep Card Styling */
+.keep-card {
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.18s ease;
+}
+.keep-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* Task Priority Indicators */
+.badge-priority-high {
+  background-color: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+.badge-priority-medium {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+.badge-priority-low {
+  background-color: #DCFCE7;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+}
+
+/* Weekly calendar date item active glow */
+.calendar-day-active {
+  border: 2px solid #2563EB !important;
+  background-color: #EFF6FF !important;
+  color: #1D4ED8 !important;
+  font-weight: 700 !important;
+}
+
+/* Code block formatting */
+pre code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Strict True Full-Circle Profile Avatar */
+#notionAvatarWrapper,
+#notionAvatarWrapper * {
+  border-radius: 50% !important;
+}
+
+#notionAvatarWrapper {
+  aspect-ratio: 1 / 1 !important;
+  width: 68px !important;
+  height: 68px !important;
+  min-width: 68px !important;
+  min-height: 68px !important;
+  max-width: 68px !important;
+  max-height: 68px !important;
+  overflow: hidden !important;
+}
+
+#notionAvatarContainer img {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  display: block !important;
+}
+
+.cursor-grab {
+  cursor: grab !important;
+}
+.cursor-grabbing {
+  cursor: grabbing !important;
+}
+
+/* No scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

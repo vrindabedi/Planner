@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#FBFBFA] text-[#2F3437] font-sans antialiased min-h-screen selection:bg-stone-200 selection:text-stone-900">
+
+  <!-- ============================================================ -->
+  <!-- FLOATING NOTIFICATION TOAST                                   -->
+  <!-- ============================================================ -->
+  <div id="globalToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 py-2 px-4 rounded-full bg-stone-900 text-white text-xs font-medium shadow-xl transition-all flex items-center gap-2">
+    <span>Notification</span>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SIGN UP / GUEST USE MODAL                                     -->
+  <!-- ============================================================ -->
+  <div id="authModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-stone-200 space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-stone-100">
+        <h3 class="text-sm font-bold text-stone-900">Account Access</h3>
+        <button id="closeAuthModalBtn" class="text-stone-400 hover:text-stone-700">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-stone-600 mb-1">Email:</label>
+          <input id="authEmailInput" type="email" placeholder="student@university.edu" class="w-full px-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-stone-600 mb-1">Name (Optional):</label>
+          <input id="authNameInput" type="text" placeholder="Your name" class="w-full px-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none" />
+        </div>
+        <button id="submitAuthBtn" class="w-full py-2 rounded-lg bg-stone-900 text-white text-xs font-medium hover:bg-stone-800 transition">
+          Sign In / Sign Up
+        </button>
+      </div>
+
+      <div class="relative flex items-center justify-center">
+        <div class="border-t border-stone-200 w-full"></div>
+        <span class="bg-white px-2 text-[10px] text-stone-400 font-medium absolute">or</span>
+      </div>
+
+      <button id="continueGuestBtn" class="w-full py-2 rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-medium transition">
+        Continue as Guest (Blank Canvas)
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- AUDIBLE ALARM RINGING MODAL                                   -->
+  <!-- ============================================================ -->
+  <div id="alarmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center space-y-3 border border-stone-200">
+      <div class="w-12 h-12 mx-auto rounded-xl bg-stone-100 text-stone-800 flex items-center justify-center">
+        <i data-lucide="bell" class="w-6 h-6 animate-pulse"></i>
+      </div>
+      <div>
+        <h3 id="alarmModalTitle" class="text-base font-bold text-stone-900">Task Reminder</h3>
+        <p id="alarmModalTime" class="text-xs text-stone-500 font-mono mt-0.5">Now</p>
+      </div>
+      <div class="pt-2 flex items-center gap-2">
+        <button id="alarmDismissBtn" class="flex-1 py-2 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-stone-800">
+          Dismiss
+        </button>
+        <button id="alarmSnoozeBtn" class="px-4 py-2 rounded-lg bg-stone-100 text-stone-700 text-xs font-medium hover:bg-stone-200">
+          Snooze 5m
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TIME PICKER & FREQUENCY MODAL                                 -->
+  <!-- ============================================================ -->
+  <div id="alarmPickerModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl p-5 max-w-sm w-full shadow-xl border border-stone-200 space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-stone-100">
+        <h4 class="text-xs font-bold text-stone-800">Schedule Reminder Alarm</h4>
+        <button id="closeAlarmPickerBtn" class="text-stone-400 hover:text-stone-700"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <p id="alarmTargetItemLabel" class="text-xs text-stone-500 truncate">Item</p>
+      <div>
+        <label class="block text-[11px] font-medium text-stone-600 mb-1">Date & Time:</label>
+        <input id="customAlarmDateTimeInput" type="datetime-local" class="w-full px-2.5 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none font-mono" />
+      </div>
+      <div>
+        <label class="block text-[11px] font-medium text-stone-600 mb-1">Repeat Frequency:</label>
+        <select id="customAlarmRepeatSelect" class="w-full px-2.5 py-1 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none">
+          <option value="none">Does not repeat (Once)</option>
+          <option value="every15m">Every 15 minutes</option>
+          <option value="hourly">Hourly</option>
+          <option value="every4h">Every 4 hours</option>
+          <option value="daily">Daily</option>
+          <option value="every2days">Every 2 days</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-1 text-[11px]">
+        <button type="button" class="quick-alarm-preset p-1.5 rounded border border-stone-200 bg-stone-50 hover:bg-stone-100 text-left" data-minutes="1">+1 min</button>
+        <button type="button" class="quick-alarm-preset p-1.5 rounded border border-stone-200 bg-stone-50 hover:bg-stone-100 text-left" data-minutes="15">+15 mins</button>
+        <button type="button" class="quick-alarm-preset p-1.5 rounded border border-stone-200 bg-stone-50 hover:bg-stone-100 text-left" data-minutes="60">+1 hour</button>
+        <button type="button" class="quick-alarm-preset p-1.5 rounded border border-stone-200 bg-stone-50 hover:bg-stone-100 text-left" data-minutes="1440">+1 day</button>
+      </div>
+      <div class="pt-2 flex items-center justify-between">
+        <button id="clearCurrentAlarmBtn" class="text-xs text-stone-500 hover:text-rose-600">Remove</button>
+        <button id="saveAlarmSettingBtn" class="px-3 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-medium hover:bg-stone-800">Set Alarm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- CHANGE COVER MODAL                                            -->
+  <!-- ============================================================ -->
+  <div id="coverModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl p-5 max-w-md w-full shadow-xl border border-stone-200 space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-stone-100">
+        <h4 class="text-xs font-bold text-stone-800">Change Cover Banner</h4>
+        <button id="closeCoverModalBtn" class="text-stone-400 hover:text-stone-700"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div>
+        <label class="block text-xs text-stone-600 mb-1">Upload File:</label>
+        <input id="coverFileInput" type="file" accept="image/*" class="w-full text-xs text-stone-500 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-stone-900 file:text-white" />
+      </div>
+      <div class="pt-1">
+        <label class="block text-xs text-stone-600 mb-1">Or Image URL:</label>
+        <div class="flex items-center gap-1.5">
+          <input id="customCoverUrlInput" type="url" placeholder="https://..." class="flex-1 px-2.5 py-1 text-xs border rounded-lg focus:outline-none font-mono" />
+          <button id="applyCoverUrlBtn" class="px-3 py-1 rounded-lg bg-stone-900 text-white text-xs">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- AVATAR UPLOAD MODAL                                           -->
+  <!-- ============================================================ -->
+  <div id="avatarModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl p-5 max-w-sm w-full shadow-xl border border-stone-200 space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-stone-100">
+        <h4 class="text-xs font-bold text-stone-800">Change Profile Photo</h4>
+        <button id="closeAvatarModalBtn" class="text-stone-400 hover:text-stone-700"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div>
+        <label class="block text-xs text-stone-600 mb-1">Upload Photo (Full Circle):</label>
+        <input id="avatarFileInput" type="file" accept="image/*" class="w-full text-xs text-stone-500 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-stone-900 file:text-white" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- STUDIO META EDIT MODAL                                        -->
+  <!-- ============================================================ -->
+  <div id="studioMetaModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl p-5 max-w-sm w-full shadow-xl border border-stone-200 space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b border-stone-100">
+        <h4 class="text-xs font-bold text-stone-800">Edit Studio Title</h4>
+        <button id="closeStudioMetaModalBtn" class="text-stone-400 hover:text-stone-700"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="space-y-2">
+        <div>
+          <label class="block text-xs text-stone-600 mb-1">Title:</label>
+          <input id="editTitleInput" type="text" class="w-full px-2.5 py-1 text-xs border border-stone-200 rounded-lg focus:outline-none" />
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button id="saveStudioMetaBtn" class="px-4 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-medium hover:bg-stone-800">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- GOOGLE KEEP READING / EDITING MODAL                          -->
+  <!-- ============================================================ -->
+  <div id="noteDetailModal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div id="noteDetailModalBox" class="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-stone-200 space-y-3 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-2 border-b border-stone-100">
+        <input id="modalNoteTitle" type="text" placeholder="Title" class="font-bold text-base text-stone-900 placeholder-stone-400 focus:outline-none bg-transparent w-full" />
+        <button id="closeNoteModalBtn" class="text-stone-400 hover:text-stone-700"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <textarea id="modalNoteBody" placeholder="Note content..." class="w-full text-xs text-stone-700 placeholder-stone-400 focus:outline-none bg-transparent resize-y min-h-[100px] leading-relaxed"></textarea>
+      <div id="modalMediaPreviewContainer"></div>
+      <!-- Modal image upload -->
+      <div class="flex items-center gap-2">
+        <label class="cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-600 text-xs font-medium">
+          <i data-lucide="image" class="w-3.5 h-3.5"></i>
+          <span>Add Image</span>
+          <input id="modalNoteImageInput" type="file" accept="image/*" class="hidden" />
+        </label>
+        <div id="modalNoteImagePreview" class="text-xs text-stone-400"></div>
+      </div>
+      <div>
+        <label class="block text-[11px] text-stone-500 mb-1">YouTube / Spotify Link:</label>
+        <input id="modalNotePlayerLink" type="url" placeholder="https://..." class="w-full px-2.5 py-1 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none font-mono" />
+      </div>
+      <div class="pt-2 border-t border-stone-100 flex items-center justify-between text-xs">
+        <button id="deleteNoteFromModalBtn" class="text-stone-400 hover:text-rose-600">Delete</button>
+        <button id="saveNoteModalBtn" class="px-4 py-1.5 rounded-lg bg-stone-900 text-white font-medium hover:bg-stone-800">Save & Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- NOTION TOP BREADCRUMB BAR                                     -->
+  <!-- ============================================================ -->
+  <header class="border-b border-stone-200/70 bg-[#FBFBFA] px-4 sm:px-8 py-2.5 flex items-center justify-between text-xs text-stone-500">
+    <div class="flex items-center gap-2">
+      <span class="flex items-center gap-1.5 font-medium text-stone-700 hover:bg-stone-100 px-2 py-1 rounded cursor-pointer">
+        <i data-lucide="file-text" class="w-3.5 h-3.5 text-stone-400"></i>
+        <span>Templates</span>
+      </span>
+      <span class="text-stone-300">/</span>
+      <span class="text-stone-800 font-medium px-2 py-1 bg-stone-100/80 rounded">Planner</span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="userProfilePill" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-stone-200 hover:bg-stone-100 transition text-stone-700 font-medium">
+        <i data-lucide="user" class="w-3.5 h-3.5 text-stone-400"></i>
+        <span id="userPillName">Guest Student</span>
+      </button>
+      <button id="testAlarmHeaderBtn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold transition" title="Test audible reminder ring">
+        <i data-lucide="bell" class="w-3.5 h-3.5 text-amber-700"></i>
+        <span>Test Alarm</span>
+      </button>
+      <button id="loadDemoTemplateBtn" class="px-2 py-1 text-[11px] text-stone-500 hover:text-stone-900 rounded border border-stone-200 hover:bg-stone-100" title="Load sample items">
+        Sample
+      </button>
+      <button id="clearWorkspaceBtn" class="px-2 py-1 text-[11px] text-stone-400 hover:text-rose-600 rounded" title="Wipe back to blank">
+        Clear
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- MAIN SINGLE-PAGE DOCUMENT                                     -->
+  <!-- ============================================================ -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-8 py-6 space-y-10">
+
+    <!-- ========================================================== -->
+    <!-- NOTION COVER BANNER + REPOSITIONING + FULL CIRCLE AVATAR   -->
+    <!-- ========================================================== -->
+    <div class="relative">
+      <div id="notionBannerContainer" class="relative w-full h-52 sm:h-64 rounded-2xl overflow-hidden bg-stone-100 select-none">
+        <img
+          id="notionBannerImg"
+          src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1800&q=80"
+          alt="Cover Art"
+          class="w-full h-full object-cover object-center transition-all duration-75 select-none"
+        />
+
+        <!-- Banner Action Buttons -->
+        <div class="absolute top-3 right-3 flex items-center gap-2 z-10">
+          <button id="repositionCoverBtn" class="bg-white/90 hover:bg-white px-3 py-1 rounded-lg text-xs font-medium text-stone-700 shadow-sm flex items-center gap-1.5 transition" title="Adjust banner vertical position">
+            <i data-lucide="move" class="w-3.5 h-3.5"></i>
+            <span>Reposition</span>
+          </button>
+          <button id="changeCoverBtn" class="bg-white/90 hover:bg-white px-3 py-1 rounded-lg text-xs font-medium text-stone-700 shadow-sm flex items-center gap-1.5 transition">
+            <i data-lucide="image" class="w-3.5 h-3.5"></i>
+            <span>Change Cover</span>
+          </button>
+        </div>
+
+        <!-- Floating Reposition Control Overlay -->
+        <div id="coverRepositionBar" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-stone-900/90 backdrop-blur-sm text-white px-4 py-2 rounded-xl shadow-xl flex items-center gap-3 text-xs">
+          <span class="text-stone-300 font-medium">Drag cover or use slider:</span>
+          <input id="coverPosSlider" type="range" min="0" max="100" value="50" class="w-28 accent-white cursor-pointer" />
+          <button id="saveCoverPosBtn" class="px-2.5 py-1 rounded-lg bg-white text-stone-900 font-semibold hover:bg-stone-100 transition">Save position</button>
+          <button id="cancelCoverPosBtn" class="px-2 py-1 rounded-lg bg-white/20 text-white font-medium hover:bg-white/30 transition">Cancel</button>
+        </div>
+
+      </div>
+
+      <!-- Circular Profile Avatar: overlaps the banner without being clipped by it -->
+      <div
+        id="notionAvatarWrapper"
+        class="absolute -bottom-8 left-6 w-16 h-16 rounded-full ring-4 ring-white bg-stone-200 overflow-hidden cursor-pointer hover:opacity-90 transition shadow-md flex items-center justify-center aspect-square"
+        style="border-radius: 50% !important; aspect-ratio: 1 / 1 !important; width: 68px !important; height: 68px !important;"
+        title="Click to change profile photo"
+      >
+        <div id="notionAvatarContainer" class="w-full h-full rounded-full flex items-center justify-center overflow-hidden aspect-square" style="border-radius: 50% !important; aspect-ratio: 1 / 1 !important;">
+          <i data-lucide="user" class="w-7 h-7 text-stone-400"></i>
+        </div>
+      </div>
+    </div>
+
+      <!-- Studio Title & Live Daily Web Random Phrase -->
+      <div class="mt-12 flex items-start justify-between gap-4">
+        <div>
+          <h1 id="studioTitleText" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-900">
+            Student Design Studio
+          </h1>
+          <!-- Daily Random Text System (Live API, updating at midnight) -->
+          <div class="flex items-center gap-2 mt-1">
+            <p id="studioSubtitleText" class="text-xs text-stone-500 font-medium leading-relaxed"></p>
+            <button id="refreshDailyPhraseBtn" class="text-stone-400 hover:text-stone-700 p-1 rounded transition" title="Fetch fresh random phrase live from web API">
+              <i data-lucide="dices" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+        <button id="editStudioMetaBtn" class="shrink-0 mt-1 p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition" title="Edit studio title">
+          <i data-lucide="pencil" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    <!-- ========================================================== -->
+    <!-- SECTION 1: DESKTOP PLANNER (First after header)            -->
+    <!-- ========================================================== -->
+    <section class="bg-white rounded-2xl p-6 sm:p-8 border border-stone-200/80 shadow-sm space-y-5">
+
+      <!-- Top Bar: "Planner" + view controls -->
+      <div class="flex items-center justify-between pb-2 border-b border-stone-100">
+        <div class="flex items-center gap-2">
+          <i data-lucide="calendar-check-2" class="w-5 h-5 text-stone-700"></i>
+          <h2 class="text-lg font-bold text-stone-900 tracking-tight">Planner</h2>
+        </div>
+
+        <div class="flex items-center gap-3 text-stone-500">
+          <button id="toggleMonthViewBtn" class="text-xs hover:text-stone-900 font-medium border border-stone-200 px-2.5 py-1 rounded-lg hover:bg-stone-50 transition">Month View</button>
+          <i data-lucide="rotate-cw" class="w-3.5 h-3.5 hover:text-stone-900 cursor-pointer" onclick="window.location.reload()"></i>
+          <i data-lucide="clock" class="w-3.5 h-3.5 hover:text-stone-900 cursor-pointer"></i>
+        </div>
+      </div>
+
+      <!-- Centered Month/Year -->
+      <div class="text-center">
+        <h3 id="plannerMonthYear" class="text-sm font-semibold text-stone-700">October 2026</h3>
+      </div>
+
+      <!-- Week strip with arrows flanking the dates -->
+      <div class="flex items-center justify-center gap-3">
+        <button id="calPrevWeekBtn" class="p-1.5 rounded-full hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition" title="Previous week">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        </button>
+        <div id="plannerWeekStrip" class="grid grid-cols-7 gap-2 flex-1 max-w-sm"></div>
+        <button id="calNextWeekBtn" class="p-1.5 rounded-full hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition" title="Next week">
+          <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Monthly Calendar Grid (toggleable) -->
+      <div id="plannerMonthGrid" class="hidden max-w-xl mx-auto space-y-2">
+        <div class="flex items-center justify-between mb-1">
+          <button id="calPrevMonthBtn" class="p-1 rounded hover:bg-stone-100 text-stone-500">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <button id="calNextMonthBtn" class="p-1 rounded hover:bg-stone-100 text-stone-500">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div class="grid grid-cols-7 gap-1 text-center text-xs text-stone-400 font-medium">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div id="plannerMonthDatesGrid" class="grid grid-cols-7 gap-1"></div>
+      </div>
+
+      <!-- Gray pill divider -->
+      <div class="w-10 h-1 bg-stone-300 rounded-full mx-auto"></div>
+
+      <!-- "From previous days" + metrics -->
+      <div class="text-center space-y-1">
+        <h3 id="plannerSectionHeading" class="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+          From previous days
+        </h3>
+        <div id="plannerMetricsSubheader" class="text-sm font-semibold text-stone-600 flex items-center justify-center gap-3">
+          <span>0h</span>
+          <span class="flex items-center gap-0.5"><i data-lucide="check" class="w-3.5 h-3.5"></i> 0</span>
+        </div>
+      </div>
+
+      <!-- 3-Column Task Board with Inline Reminder & Frequency Creation -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-stone-100">
+
+        <!-- Column 1: Academic -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between pb-1 text-xs font-semibold text-stone-700">
+            <span>Academic</span>
+            <button class="btn-add-task-col text-stone-400 hover:text-stone-900 text-xs font-medium" data-col="academic">+ Add</button>
+          </div>
+
+          <!-- Academic Task Creator Box -->
+          <div id="inlineTaskInputRow_academic" class="hidden mb-3 p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-2 shadow-xs">
+            <input type="text" placeholder="Task title..." class="input-task-title w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none" data-col="academic" />
+            
+            <div class="space-y-1.5 pt-1 border-t border-stone-200/60">
+              <div class="flex items-center justify-between text-[11px] text-stone-500 font-medium">
+                <span class="flex items-center gap-1"><i data-lucide="bell" class="w-3 h-3 text-stone-400"></i> Reminder Alarm</span>
+                <span class="text-[10px] text-stone-400">Optional</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                <div>
+                  <label class="block text-[10px] text-stone-400 mb-0.5">Date & Time:</label>
+                  <input type="datetime-local" class="input-task-alarm-time w-full px-2 py-1 text-[11px] bg-white border border-stone-200 rounded-lg focus:outline-none font-mono" />
+                </div>
+                <div>
+                  <label class="block text-[10px] text-stone-400 mb-0.5">Frequency:</label>
+                  <select class="input-task-alarm-repeat w-full px-2 py-1 text-[11px] bg-white border border-stone-200 rounded-lg focus:outline-none">
+                    <option value="none">Does not repeat (Once)</option>
+                    <option value="every15m">Every 15 minutes</option>
+                    <option value="hourly">Hourly</option>
+                    <option value="every4h">Every 4 hours</option>
+                    <option value="daily">Daily</option>
+                    <option value="every2days">Every 2 days</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 text-[10px]">
+                <span class="text-stone-400">Quick:</span>
+                <button type="button" class="btn-quick-alarm px-1.5 py-0.5 bg-white hover:bg-stone-100 border border-stone-200 rounded text-stone-600" data-mins="15">+15m</button>
+                <button type="button" class="btn-quick-alarm px-1.5 py-0.5 bg-white hover:bg-stone-100 border border-stone-200 rounded text-stone-600" data-mins="60">+1h</button>
+                <button type="button" class="btn-quick-alarm px-1.5 py-0.5 bg-white hover:bg-stone-100 border border-stone-200 rounded text-stone-600" data-preset="tomorrow9am">Tmrw 9am</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <input type="number" min="0" max="100" placeholder="weight %" class="input-task-weight w-20 px-2 py-1 text-[11px] bg-white border border-stone-200 rounded-lg focus:outline-none font-mono" />
+              <div class="flex items-center gap-2">
+                <button type="button" class="btn-cancel-inline-task text-xs text-stone-400 hover:text-stone-700 px-2 py-1" data-col="academic">Cancel</button>
+                <button type="button" class="btn-submit-inline-task text-xs bg-stone-900 text-white font-medium px-3 py-1 rounded-lg hover:bg-stone-800 transition" data-col="academic">Add Task</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="tasksColAcademic" data-column="academic" class="space-y-1 min-h-[100px]"></div>
+        </div>
+
+        <!-- Column 2: Extracurriculars -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between pb-1 text-xs font-semibold text-stone-700">
+            <span>Extracurriculars</span>
+            <button class="btn-add-task-col text-stone-400 hover:text-stone-900 text-xs font-medium" data-col="extracurriculars">+ Add</button>
+          </div>
+
+          <div id="inlineTaskInputRow_extracurriculars" class="hidden mb-3 p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-2 shadow-xs">
+            <input type="text" placeholder="Club or project meeting..." class="input-task-title w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none" data-col="extracurriculars" />
+            
+            <div class="space-y-1.5 pt-1 border-t border-stone-200/60">
+              <div class="flex items-center justify-between text-[11px] text-stone-500 font-medium">
+                <span class="flex items-center gap-1"><i data-lucide="bell" class="w-3 h-3 text-stone-400"></i> Reminder Alarm</span>
+                <span class="text-[10px] text-stone-400">Optional</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                <div>
+                  <label class="block text-[10px] text-stone-400 mb-0.5">Date & Time:</label>
+                  <input type="datetime-local" class="input-task-alarm-time w-full px-2 py-1 text-[11px] bg-white border border-stone-200 rounded-lg focus:outline-none font-mono" />
+                </div>
+                <div>
+                  <label class="block text-[10px] text-stone-400 mb-0.5">Frequency:</label>
+                  <select class="input-task-alarm-repeat w-full px-2 py-1 text-[11px] bg-white border border-stone-200 rounded-lg focus:outline-none">
+                    <option value="none">Does not repeat (Once)</option>
+                    <option value="every15m">Every 15 minutes</option>
+                    <option value="hourly">Hourly</option>
+                    <option value="every4h">Every 4 hours</option>
+                    <option value="daily">Daily</option>
+                    <option value="every2days">Every 2 days</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 text-[10px]">
+                <span class="text-stone-400">Quick:</span>
+                <button type="button" class="btn-quick-alarm px-1.5 py-0.5 bg-white hover:bg-stone-100 border border-stone-200 rounded text-stone-600" data-mins="15">+15m</button>
+                <button type="button" class="btn-quick-alarm px-1.5 py-0.5 bg-white hover:bg-stone-100 border border-stone-200 rounded text-stone-600" data-mins="60">+1h</button>
+                <button type="button" class="btn-quick-alarm px-1.5 py-0.5 bg-white hover:bg-stone-100 border border-stone-200 rounded text-stone-600" data-preset="tomorrow9am">Tmrw 9am</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+              <button type="button" class="btn-cancel-inline-task text-xs text-stone-400 hover:text-stone-700 px-2 py-1" data-col="extracurriculars">Cancel</button>
+              <button type="button" class="btn-submit-inline-task text-xs bg-stone-900 text-white font-medium px-3 py-1 rounded-lg hover:bg-stone-800 transition" data-col="extracurriculars">Add Task</button>
+            </div>
+          </div>
+
+          <div id="tasksColExtra" data-column="extracurriculars" class="space-y-1 min-h-[100px]"></div>
+        </div>
+
+        <!-- Column 3: Miscellaneous -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between pb-1 text-xs font-semibold text-stone-700">
+            <span>Miscellaneous</span>
+            <button class="btn-add-task-col text-stone-400 hover:text-stone-900 text-xs font-medium" data-col="miscellaneous">+ Add</button>
+          </div>
+
+          <div id="inlineTaskInputRow_miscellaneous" class="hidden mb-3 p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-2 shadow-xs">
+            <input type="text" placeholder="Admin or personal errand..." class="input-task-title w-full px-2.5 py-1.5 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none" data-col="miscellaneous" />
+            
+            <div class="space-y-1.5 pt-1 border-t border-stone-200/60">
+              <div class="flex items-center justify-between text-[11px] text-stone-500 font-medium">
+                <span class="flex items-center gap-1"><i data-lucide="bell" class="w-3 h-3 text-stone-400"></i> Reminder Alarm</span>
+                <span class="text-[10px] text-stone-400">What to write here?</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                <div>
+                  <label class="block text-[10px] text-stone-400 mb-0.5">Date & Time:</label>
+                  <input type="datetime-local" class="input-task-alarm-time w-full px-2 py-1 text-[11px] bg-white border border-stone-200 rounded-lg focus:outline-none font-mono" />
+                </div>
+                <div>
+                  <label class="block text-[10px] text-stone-400 mb-0.5">Frequency:</label>
+                  <select class="input-task-alarm-repeat w-full px-2 py-1 text-[11px] bg-white border border-stone-200 rounded-lg focus:outline-none">
+                    <option value="none">Does not repeat (Once)</option>
+                    <option value="every15m">Every 15 minutes</option>
+                    <option value="hourly">Hourly</option>
+                    <option value="every4h">Every 4 hours</option>
+                    <option value="daily">Daily</option>
+                    <option value="every2days">Every 2 days</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 text-[10px]">
+                <span class="text-stone-400">Quick:</span>
+                <button type="button" class="btn-quick-alarm px-1.5 py-0.5 bg-white hover:bg-stone-100 border border-stone-200 rounded text-stone-600" data-mins="15">+15m</button>
+                <button type="button" class="btn-quick-alarm px-1.5 py-0.5 bg-white hover:bg-stone-100 border border-stone-200 rounded text-stone-600" data-mins="60">+1h</button>
+                <button type="button" class="btn-quick-alarm px-1.5 py-0.5 bg-white hover:bg-stone-100 border border-stone-200 rounded text-stone-600" data-preset="tomorrow9am">Tmrw 9am</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+              <button type="button" class="btn-cancel-inline-task text-xs text-stone-400 hover:text-stone-700 px-2 py-1" data-col="miscellaneous">Cancel</button>
+              <button type="button" class="btn-submit-inline-task text-xs bg-stone-900 text-white font-medium px-3 py-1 rounded-lg hover:bg-stone-800 transition" data-col="miscellaneous">Add Task</button>
+            </div>
+          </div>
+
+          <div id="tasksColMisc" data-column="miscellaneous" class="space-y-1 min-h-[100px]"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- SECTION 2: GOOGLE KEEP NOTES (Image 1/2 Style)            -->
+    <!-- ========================================================== -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between border-b border-stone-200/80 pb-2 text-xs">
+        <div class="flex items-center gap-1.5 font-bold text-stone-900">
+          <i data-lucide="sticky-note" class="w-4 h-4 text-stone-600"></i>
+          <span>Google Keep Notes</span>
+        </div>
+        <input
+          id="searchNotesInput"
+          type="text"
+          placeholder="Search notes..."
+          class="px-3 py-1 text-xs bg-white border border-stone-200 rounded-lg focus:outline-none w-56 font-mono"
+        />
+      </div>
+
+      <!-- Note Creator Box with Reminder & Frequency & Image support -->
+      <div id="keepCreatorBox" class="max-w-xl mx-auto bg-white rounded-xl border border-stone-200 shadow-sm p-3 transition">
+        <input
+          id="newNoteTitle"
+          type="text"
+          placeholder="Title"
+          class="w-full font-bold text-xs text-stone-900 placeholder-stone-400 focus:outline-none mb-1 bg-transparent"
+        />
+        <textarea
+          id="newNoteBody"
+          placeholder="Take a note..."
+          class="w-full text-xs text-stone-700 placeholder-stone-400 focus:outline-none bg-transparent resize-none min-h-[40px]"
+        ></textarea>
+
+        <div id="keepCreatorExpanded" class="hidden space-y-2 pt-2 border-t border-stone-100">
+          <!-- Image preview area -->
+          <div id="noteCreatorImagePreview" class="hidden rounded-lg overflow-hidden max-h-32">
+            <img id="noteCreatorImageEl" src="" alt="" class="w-full h-full object-cover" />
+          </div>
+
+          <!-- Reminder Alarm section in note creator -->
+          <div id="noteReminderInputContainer" class="hidden space-y-1.5 p-2.5 bg-stone-50 rounded-xl border border-stone-200">
+            <div class="flex items-center justify-between text-[11px] text-stone-600 font-medium">
+              <span class="flex items-center gap-1"><i data-lucide="bell" class="w-3 h-3 text-stone-400"></i> Set Note Reminder Alarm</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              <div>
+                <label class="block text-[10px] text-stone-400 mb-0.5">Date & Time:</label>
+                <input id="newNoteAlarmTime" type="datetime-local" class="w-full px-2 py-1 text-[11px] bg-white border border-stone-200 rounded-lg focus:outline-none font-mono" />
+              </div>
+              <div>
+                <label class="block text-[10px] text-stone-400 mb-0.5">Frequency:</label>
+                <select id="newNoteAlarmRepeat" class="w-full px-2 py-1 text-[11px] bg-white border border-stone-200 rounded-lg focus:outline-none">
+                  <option value="none">Does not repeat (Once)</option>
+                  <option value="every15m">Every 15 minutes</option>
+                  <option value="hourly">Hourly</option>
+                  <option value="every4h">Every 4 hours</option>
+                  <option value="daily">Daily</option>
+                  <option value="every2days">Every 2 days</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="mediaLinkInputContainer" class="hidden">
+            <input id="newNotePlayerLink" type="url" placeholder="Attach YouTube or Spotify link..." class="w-full px-2 py-1 text-xs border rounded-lg focus:outline-none font-mono" />
+          </div>
+          <div id="codeSnippetCreatorBlock" class="hidden">
+            <textarea id="newNoteCode" placeholder="// Code snippet..." class="w-full font-mono text-xs bg-stone-900 text-emerald-300 p-2 rounded-lg focus:outline-none min-h-[60px]"></textarea>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-stone-400">
+            <div class="flex items-center gap-1">
+              <!-- Image upload button -->
+              <label class="p-1 hover:text-stone-700 cursor-pointer" title="Upload Image">
+                <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                <input id="noteCreatorImageInput" type="file" accept="image/*" class="hidden" />
+              </label>
+              <!-- Reminder / Alarm button -->
+              <button id="toggleNoteReminderBtn" class="p-1 hover:text-stone-700" title="Set Reminder Alarm"><i data-lucide="bell" class="w-3.5 h-3.5"></i></button>
+              <button id="toggleMediaLinkBtn" class="p-1 hover:text-stone-700" title="Attach Link"><i data-lucide="music" class="w-3.5 h-3.5"></i></button>
+              <button id="toggleCodeSnippetBtn" class="p-1 hover:text-stone-700" title="Add Code"><i data-lucide="code" class="w-3.5 h-3.5"></i></button>
+              <button id="pinNewNoteBtn" class="p-1 hover:text-stone-700" title="Pin"><i data-lucide="pin" class="w-3.5 h-3.5"></i></button>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="closeKeepCreatorBtn" class="text-stone-400 hover:text-stone-700 text-xs">Close</button>
+              <button id="saveNewNoteBtn" class="px-3 py-1 rounded-lg bg-stone-900 text-white text-xs font-medium">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pinned Notes -->
+      <div id="pinnedNotesSection" class="space-y-2" style="display:none">
+        <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Pinned</h4>
+        <div id="pinnedNotesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+      </div>
+
+      <!-- All Notes -->
+      <div id="otherNotesSection" class="space-y-2">
+        <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Notes</h4>
+        <div id="otherNotesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+      </div>
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- SECTION 3: MEDIA PLAYER + POMODORO                         -->
+    <!-- ========================================================== -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+      <!-- Left: YouTube Music Miniplayer -->
+      <div class="lg:col-span-5 bg-white rounded-2xl p-4 border border-stone-200/80 shadow-sm flex flex-col gap-3">
+        <div class="flex items-center justify-between pb-2 border-b border-stone-100 text-xs">
+          <span class="px-2.5 py-1 rounded-md text-stone-900 font-semibold bg-stone-100">YouTube Music Miniplayer</span>
+          <span class="text-[11px] text-stone-400 font-mono">Media Player</span>
+        </div>
+
+        <div class="flex flex-col gap-2.5 flex-1">
+          <div class="aspect-video rounded-xl overflow-hidden bg-black">
+            <iframe
+              id="youtubePlayerFrame"
+              width="100%"
+              height="100%"
+              src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk"
+              title="YouTube Music Player"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <input
+              id="youtubeUrlInput"
+              type="text"
+              placeholder="Paste YouTube or YouTube Music song / playlist URL..."
+              aria-label="YouTube or YouTube Music link"
+              class="flex-1 px-2.5 py-1 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none font-mono"
+            />
+            <button id="loadYouTubeBtn" class="px-2.5 py-1 rounded-lg bg-stone-900 text-white text-xs font-medium hover:bg-stone-800">
+              Play
+            </button>
+          </div>
+          <p id="youtubePlayerMessage" class="min-h-4 text-[11px] text-amber-700" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="pt-1 text-[11px] text-stone-400 flex items-center justify-between border-t border-stone-100">
+          <span>YouTube Music</span>
+          <span class="font-mono text-stone-500">Miniplayer</span>
+        </div>
+      </div>
+
+      <!-- Right: Focus Session Tracker (Stopwatch & Timer with Subject Tags & Pause Tracking) -->
+      <div id="focusTrackerCard" class="lg:col-span-7 rounded-2xl overflow-hidden shadow-sm border border-stone-200/80 bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 text-white p-6 sm:p-7 flex flex-col justify-between space-y-5">
+        
+        <!-- Top Bar: Mode Switcher & Status -->
+        <div class="flex items-center justify-between pb-3 border-b border-white/10 text-xs">
+          <div class="flex items-center gap-1.5 p-1 rounded-full bg-black/40 border border-white/10">
+            <button id="modeBtnTimer" class="px-4 py-1.5 rounded-full text-xs font-bold transition bg-white text-stone-900 shadow-sm">
+              Timer
+            </button>
+            <button id="modeBtnStopwatch" class="px-4 py-1.5 rounded-full text-xs transition text-stone-300 hover:text-white">
+              Stopwatch
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span id="focusPauseCountBadge" class="px-2 py-0.5 rounded-full bg-white/10 text-[11px] font-mono text-stone-300 border border-white/10" title="Pauses in current session">
+              0 pauses
+            </span>
+            <span id="focusStatusLabel" class="text-xs font-medium text-stone-300 flex items-center">
+              <span class="inline-block w-2 h-2 rounded-full bg-stone-400 mr-1.5"></span>Ready
+            </span>
+          </div>
+        </div>
+
+        <!-- Subject Tags Selector Bar -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs text-stone-300">
+            <span class="font-medium flex items-center gap-1.5">
+              <i data-lucide="tag" class="w-3.5 h-3.5 text-stone-400"></i>
+              <span>Studying:</span>
+              <strong id="activeSubjectDisplayLabel" class="text-white font-bold font-mono">#Academic</strong>
+            </span>
+            <span class="text-[10px] text-stone-400">Click tag to switch</span>
+          </div>
+
+          <!-- Dynamic Subject Tag Pills -->
+          <div class="flex items-center gap-1.5 flex-wrap" id="subjectTagsContainer">
+            <!-- Rendered by timer.js -->
+          </div>
+
+          <!-- Add Custom Subject Tag Form -->
+          <div class="flex items-center gap-1.5 pt-1">
+            <input
+              id="newSubjectTagInput"
+              type="text"
+              placeholder="#NewSubject..."
+              class="px-2.5 py-1 text-xs bg-white/10 border border-white/15 rounded-lg focus:outline-none placeholder-stone-400 text-white font-mono w-36"
+            />
+            <button
+              id="addNewSubjectTagBtn"
+              class="px-2.5 py-1 text-xs bg-white/20 hover:bg-white/30 border border-white/20 rounded-lg text-white font-medium transition"
+              title="Add subject tag"
+            >
+              + Tag
+            </button>
+          </div>
+        </div>
+
+        <!-- Timer-Specific Duration Controls (Preset buttons + Custom input) -->
+        <div id="timerSpecificControls" class="space-y-2 pt-2 border-t border-white/10">
+          <div class="flex items-center justify-between text-xs text-stone-300">
+            <span>Set Duration:</span>
+            <div class="flex items-center gap-1.5">
+              <input
+                id="customTimerMinsInput"
+                type="number"
+                min="1"
+                max="360"
+                value="25"
+                class="w-16 px-2 py-0.5 text-xs bg-white/10 border border-white/20 rounded-md text-white font-mono text-center focus:outline-none"
+              />
+              <span class="text-[11px] text-stone-400">mins</span>
+              <button id="applyCustomTimerBtn" class="px-2 py-0.5 rounded-md bg-white/20 hover:bg-white/30 text-xs font-medium text-white transition">
+                Set
+              </button>
+            </div>
+          </div>
+          <!-- Presets -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button class="timer-preset-btn px-2.5 py-1 rounded-md text-[11px] bg-white/10 hover:bg-white/20 border border-white/10 text-stone-200 transition font-mono" data-mins="15">15m</button>
+            <button class="timer-preset-btn px-2.5 py-1 rounded-md text-[11px] bg-white/10 hover:bg-white/20 border border-white/10 text-stone-200 transition font-mono" data-mins="25">25m</button>
+            <button class="timer-preset-btn px-2.5 py-1 rounded-md text-[11px] bg-white/10 hover:bg-white/20 border border-white/10 text-stone-200 transition font-mono" data-mins="45">45m</button>
+            <button class="timer-preset-btn px-2.5 py-1 rounded-md text-[11px] bg-white/10 hover:bg-white/20 border border-white/10 text-stone-200 transition font-mono" data-mins="60">60m</button>
+            <button class="timer-preset-btn px-2.5 py-1 rounded-md text-[11px] bg-white/10 hover:bg-white/20 border border-white/10 text-stone-200 transition font-mono" data-mins="90">90m</button>
+          </div>
+        </div>
+
+        <!-- Giant Time Display -->
+        <div class="text-center py-4 my-auto select-none">
+          <div id="focusDisplayTime" class="font-sans text-6xl sm:text-7xl font-black tracking-tight text-white drop-shadow font-mono">
+            25:00
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-center gap-2 pt-2 border-t border-white/10">
+          <button id="focusToggleBtn" class="px-6 py-2.5 rounded-full bg-white text-stone-900 font-bold text-xs shadow-md transition hover:bg-stone-100 flex items-center gap-1.5">
+            <i id="focusToggleBtnIcon" data-lucide="play" class="w-4 h-4 fill-stone-900"></i>
+            <span id="focusToggleBtnText">Start Focus</span>
+          </button>
+          <button id="focusResetBtn" class="px-4 py-2.5 rounded-full bg-white/15 text-white font-medium text-xs border border-white/20 hover:bg-white/25 transition">
+            Reset
+          </button>
+          <button id="focusSaveSessionBtn" class="px-4 py-2.5 rounded-full bg-white/15 text-white font-medium text-xs border border-white/20 hover:bg-white/25 transition flex items-center gap-1.5" title="Log current elapsed time to progress stats">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span>Log Progress</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================== -->
+    <!-- SECTION 4: WEEKLY & MONTHLY PROGRESS ANALYTICS             -->
+    <!-- ========================================================== -->
+    <section class="bg-white rounded-2xl p-6 sm:p-8 border border-stone-200/80 shadow-sm space-y-6">
+      
+      <!-- Top Header: Title, View Switcher & Period Navigator -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-stone-100 gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="trending-up" class="w-5 h-5 text-stone-700"></i>
+            <h3 class="font-bold text-base text-stone-900">Focus Progress & Analytics</h3>
+          </div>
+          <p id="statsPeriodMetricSub" class="text-xs text-stone-400 mt-0.5">
+            Structured tracking synced automatically with timer & stopwatch
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- View Switcher -->
+          <div class="flex items-center gap-1 p-1 rounded-xl bg-stone-100 border border-stone-200/60 text-xs">
+            <button id="statsViewWeeklyBtn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-stone-900 text-white shadow-xs transition">
+              Weekly View
+            </button>
+            <button id="statsViewMonthlyBtn" class="px-3.5 py-1.5 rounded-lg text-xs transition text-stone-600 hover:text-stone-900">
+              Monthly View
+            </button>
+          </div>
+
+          <!-- Period Navigator (< Today >) -->
+          <div class="flex items-center gap-1 text-xs">
+            <button id="statsPrevPeriodBtn" class="p-1.5 rounded-lg border border-stone-200 hover:bg-stone-50 text-stone-600 transition" title="Previous period">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <span id="statsPeriodLabel" class="font-semibold text-xs text-stone-800 px-2 py-1 bg-stone-50 rounded-lg border border-stone-200 font-mono">
+              Current Period
+            </span>
+            <button id="statsNextPeriodBtn" class="p-1.5 rounded-lg border border-stone-200 hover:bg-stone-50 text-stone-600 transition" title="Next period">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+            <button id="statsTodayPeriodBtn" class="px-2.5 py-1.5 rounded-lg border border-stone-200 hover:bg-stone-50 text-[11px] text-stone-500 font-medium transition">
+              Today
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Core Metrics: Total Focus, Avg Study Time, Pauses Count, Streak -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        <!-- Metric 1: Total Focus Time -->
+        <div class="p-4 bg-stone-50 border border-stone-200/70 rounded-xl space-y-1">
+          <div class="flex items-center justify-between text-stone-500">
+            <span>Total Focus</span>
+            <i data-lucide="clock" class="w-4 h-4 text-stone-400"></i>
+          </div>
+          <h4 id="statsTotalHours" class="text-2xl font-black text-stone-900 font-mono tracking-tight">0.0 hrs</h4>
+          <p class="text-[10px] text-stone-400">Total study in selected period</p>
+        </div>
+
+        <!-- Metric 2: Average Daily Study Time -->
+        <div class="p-4 bg-stone-50 border border-stone-200/70 rounded-xl space-y-1">
+          <div class="flex items-center justify-between text-stone-500">
+            <span>Avg Daily Study</span>
+            <i data-lucide="activity" class="w-4 h-4 text-stone-400"></i>
+          </div>
+          <h4 id="statsAvgDailyStudyTime" class="text-2xl font-black text-stone-900 font-mono tracking-tight">0.0 hrs/day</h4>
+          <p class="text-[10px] text-stone-400">Average daily focus time</p>
+        </div>
+
+        <!-- Metric 3: Number of Times Paused -->
+        <div class="p-4 bg-stone-50 border border-stone-200/70 rounded-xl space-y-1">
+          <div class="flex items-center justify-between text-stone-500">
+            <span>Times Paused</span>
+            <i data-lucide="pause-circle" class="w-4 h-4 text-amber-500"></i>
+          </div>
+          <h4 id="statsTotalPausesCount" class="text-2xl font-black text-stone-900 font-mono tracking-tight">0 pauses</h4>
+          <p class="text-[10px] text-stone-400">Total pauses logged</p>
+        </div>
+
+        <!-- Metric 4: Streak -->
+        <div class="p-4 bg-stone-50 border border-stone-200/70 rounded-xl space-y-1">
+          <div class="flex items-center justify-between text-stone-500">
+            <span>Focus Streak</span>
+            <i data-lucide="flame" class="w-4 h-4 text-orange-500"></i>
+          </div>
+          <h4 id="statsStreakDays" class="text-2xl font-black text-stone-900 font-mono tracking-tight">0 days</h4>
+          <p class="text-[10px] text-stone-400">Consecutive active study days</p>
+        </div>
+      </div>
+
+      <!-- Hours in Every Day Chart -->
+      <div class="p-5 bg-white rounded-2xl border border-stone-200/80 space-y-3">
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-1.5 font-bold text-stone-800">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-stone-500"></i>
+            <span>Hours in Every Day</span>
+          </div>
+          <span class="text-[11px] text-stone-400 font-mono">Daily Distribution</span>
+        </div>
+        
+        <!-- Daily chart component -->
+        <div id="statsDailyHoursChart">
+          <!-- Rendered dynamically by stats.js -->
+        </div>
+      </div>
+
+      <!-- Subject Tags Breakdown & Recent Session Log (2 Columns) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+        
+        <!-- Subject Tags Breakdown -->
+        <div class="lg:col-span-5 space-y-3">
+          <div class="flex items-center justify-between text-xs pb-1 border-b border-stone-100">
+            <span class="font-bold text-stone-800 flex items-center gap-1.5">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-stone-500"></i>
+              <span>Subject Time Breakdown</span>
+            </span>
+            <span class="text-[11px] text-stone-400 font-mono">By Subject Tag</span>
+          </div>
+
+          <div id="statsSubjectBreakdownList" class="space-y-2">
+            <!-- Rendered by stats.js -->
+          </div>
+        </div>
+
+        <!-- Session History Log -->
+        <div class="lg:col-span-7 space-y-3">
+          <div class="flex items-center justify-between text-xs pb-1 border-b border-stone-100">
+            <span class="font-bold text-stone-800 flex items-center gap-1.5">
+              <i data-lucide="list-checks" class="w-4 h-4 text-stone-500"></i>
+              <span>Session History</span>
+            </span>
+            <span class="text-[11px] text-stone-400 font-mono">Recent Logs</span>
+          </div>
+
+          <div class="border border-stone-200/70 rounded-xl overflow-hidden bg-white">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-stone-50 border-b border-stone-200 text-stone-500 text-[11px]">
+                  <tr>
+                    <th class="py-2 px-3 font-semibold">Date</th>
+                    <th class="py-2 px-3 font-semibold">Subject Tag</th>
+                    <th class="py-2 px-3 font-semibold">Mode</th>
+                    <th class="py-2 px-3 font-semibold">Focus</th>
+                    <th class="py-2 px-3 font-semibold">Pauses</th>
+                  </tr>
+                </thead>
+                <tbody id="statsHistoryList" class="divide-y divide-stone-100">
+                  <!-- Rendered by stats.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Hidden global note image input -->
+  <input id="noteImageFileInputGlobal" type="file" accept="image/*" class="hidden" />
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/audio-alarms.js"></script>
+  <script src="js/header.js"></script>
+  <script src="js/keep.js"></script>
+  <script src="js/planner.js"></script>
+  <script src="js/media.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
